@@ -12,7 +12,7 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: npm install -g serverless
+    - run: npm install -g serverless@3.38.0
     - run: npm install
 
     - name: Set up AWS Credentials
@@ -36,5 +36,8 @@ jobs:
     - name: Extract branch name
       id: extract_branch
       run: echo "branch_name=${GITHUB_REF##*/}" >> $GITHUB_ENV
+
+    #- name: Serverless Login
+     # run: echo "${{ secrets.SERVERLESS_TOKEN }}" | serverless login --token
 
     - run: serverless deploy --stage ${{ env.branch_name }} --verbose
