@@ -1,4 +1,4 @@
-// require("dotenv").config(); //Now need to do this when loading in package.json npm start command.
+require("dotenv").config(); //Now need to do this when loading in package.json npm start command.
 const express = require("express");
 const app = express();
 const serverless = require('serverless-http');
