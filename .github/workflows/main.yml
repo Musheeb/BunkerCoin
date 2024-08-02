@@ -11,8 +11,8 @@ jobs:
     - uses: actions/checkout@v3
     - uses: actions/setup-node@v3
       with:
-        node-version: 16
-    - run: npm install -g serverless
+        node-version: 18
+    - run: npm install -g serverless@3.38.0
     - run: npm install
 
     - name: Set up AWS Credentials
@@ -25,9 +25,9 @@ jobs:
     - name: Set environment file
       run: |
         if [ "${{ github.ref }}" == "refs/heads/dev" ]; then
-          echo "${{ env.STAGING_ENV }}" > .env
+          echo "${{ secrets.STAGING_ENV }}" > .env
         elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
-          echo "${{ env.PRODUCTION_ENV }}" > .env
+          echo "${{ secrets.PRODUCTION_ENV }}" > .env
         fi
 
     - run: npx prisma generate
@@ -36,5 +36,8 @@ jobs:
     - name: Extract branch name
       id: extract_branch
       run: echo "branch_name=${GITHUB_REF##*/}" >> $GITHUB_ENV
+
+    #- name: Serverless Login
+     # run: echo "${{ secrets.SERVERLESS_TOKEN }}" | serverless login --token
 
     - run: serverless deploy --stage ${{ env.branch_name }} --verbose
