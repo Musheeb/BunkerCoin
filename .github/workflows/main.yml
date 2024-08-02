@@ -43,6 +43,9 @@ jobs:
      # run: echo "${{ secrets.SERVERLESS_TOKEN }}" | serverless login --token
 
     #- run: serverless deploy --stage ${{ env.branch_name }} --verbose
+    #- name: Serverless deploy
+    #  run: serverless deploy --stage ${{ env.STAGE }} --verbose
     - name: Serverless deploy
-      run: serverless deploy --stage ${{ env.STAGE }} --verbose
-
+      run: |
+        echo "Deploying to stage ${{ env.STAGE }}"
+        serverless deploy --stage ${{ env.STAGE }} --verbose
