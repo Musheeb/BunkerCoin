@@ -64,7 +64,7 @@ resources:
       Type: 'AWS::S3::Bucket'
       DeletionPolicy : Retain
       Properties:
-        BucketName: bunker-coin-${self:provider.stage}
+        BucketName: bunker-coin-github-${self:provider.stage}
         BucketEncryption:
           ServerSideEncryptionConfiguration:
             - ServerSideEncryptionByDefault:
