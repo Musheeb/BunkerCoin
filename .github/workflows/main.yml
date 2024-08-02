@@ -20,12 +20,21 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: eu-central-1   
-  # Replace with your region
-    - run: echo "$STAGING_ENV" > .env
-      if: github.ref == 'refs/heads/dev'
-    - run: echo "$PRODUCTION_ENV" > .env
-      if: github.ref == 'refs/heads/main'
+        aws-region: eu-central-1  # Replace with your region
+
+    - name: Set environment file
+      run: |
+        if [ "${{ github.ref }}" == "refs/heads/dev" ]; then
+          echo "$STAGING_ENV" > .env
+        elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
+          echo "$PRODUCTION_ENV" > .env
+        fi
+
     - run: npx prisma generate
     - run: npx prisma migrate deploy
-    - run: serverless deploy --stage ${{ github.ref.split('/')[-1] }} --verbose
+
+    - name: Extract branch name
+      id: extract_branch
+      run: echo "branch_name=${GITHUB_REF##*/}" >> $GITHUB_ENV
+
+    - run: serverless deploy --stage ${{ env.branch_name }} --verbose
