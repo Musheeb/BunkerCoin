@@ -25,9 +25,9 @@ jobs:
     - name: Set environment file
       run: |
         if [ "${{ github.ref }}" == "refs/heads/dev" ]; then
-          echo "${{ env.STAGING_ENV }}" > .env
+          echo "${{ secrets.STAGING_ENV }}" > .env
         elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
-          echo "${{ env.PRODUCTION_ENV }}" > .env
+          echo "${{ secrets.PRODUCTION_ENV }}" > .env
         fi
 
     - run: npx prisma generate
