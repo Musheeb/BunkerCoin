@@ -1,0 +1,81 @@
+service: bunker-coin
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: eu-central-1
+  stage: ${opt:stage, 'dev'} # This sets the default stage to 'dev'
+  lambdaHashingVersion: "20201221"
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-offline
+  - serverless-iam-roles-per-function
+  - serverless-plugin-log-retention
+
+package:
+  individually: true
+  excludeDevDependencies: true
+  patterns:
+    - '!node_modules/aws-sdk/**'
+    - '!node_modules/@aws-crypto/**'
+    - '!node_modules/@aws-sdk/**'
+    - '!node_modules/bowser/**'
+    - '!node_modules/fast-xml-parser/**'
+    - '!node_modules/strnum/**'
+
+custom:
+  logRetentionInDays: 7
+
+functions:
+  api:
+    handler: server.handler
+    timeout: 60
+    memorySize: 1024
+    environment:
+      LAMBDA: TRUE
+      REQUIRE_AWS_V3: TRUE
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - s3:*
+          - ses:SendEmail
+          - lambda:InvokeFunction
+          - lambda:InvokeAsync
+          - execute-api:Invoke
+        Resource: "*"
+
+    events:
+      - http:
+          path: /
+          method: ANY
+          cors:
+            origin: '*'
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors:
+            origin: '*'
+
+resources:
+  Resources:
+    UploadBucket:
+      Type: 'AWS::S3::Bucket'
+      DeletionPolicy : Retain
+      Properties:
+        BucketName: bunker-coin-${self:provider.stage}
+        BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: AES256
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - GET
+                - HEAD
+                - PUT
+              AllowedOrigins:
+                - "*"
+              AllowedHeaders:
+                - "*"
