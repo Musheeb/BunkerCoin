@@ -11,7 +11,7 @@ const middleware = require('i18next-http-middleware')
 // const createDatabaseConnection = require('./config/db.config');
 const prisma = require('./config/prismaClient');
 
-const UsersRoutes = require('./routes/users');
+const UsersRoutes = require('./routes/users.routes');
 const AdminRoutes = require('./routes/admin.routes')
 const PrivilegesRoutes = require('./routes/privilege.routes')
 
