@@ -9,12 +9,17 @@ datasource db {
 }
 
 model User {
-  id        Int      @default(autoincrement())
-  uuid      String   @id @unique @default(uuid()) @db.Uuid
-  username  String   @unique
-  email     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  id              Int      @default(autoincrement())
+  uuid            String   @id @unique @default(uuid()) @db.Uuid
+  username        String   @unique
+  email           String   @unique
+  referralCode    String
+  referredBy      String?
+  token           Json?    @default("[]")
+  bcWallet        BigInt?
+  comissionWallet Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now())
 }
 
 model Admin {
