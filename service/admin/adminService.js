@@ -121,6 +121,50 @@ const getSubAdminDetails = async (uuid) => {
   return subAdmin;
 };
 
+
+const getAllSubAdmins = async (search = '', page = 1, limit = 10) => {
+  const offset = (page - 1) * limit;
+
+  const subAdmins = await prisma.admin.findMany({
+    where: {
+      isSuper: false,
+      OR: [
+        { username: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+      ],
+    },
+    skip: offset,
+    take: limit,
+    select: {
+      uuid: true,
+      username: true,
+      email: true,
+      status: true,
+      privileges: {
+        include: {
+          privilegeMaster: true,
+        },
+      },
+    },
+  });
+
+  const totalSubAdmins = await prisma.admin.count({
+    where: {
+      isSuper: false,
+      OR: [
+        { username: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+      ],
+    },
+  });
+
+  return {
+    subAdmins,
+    totalPages: Math.ceil(totalSubAdmins / limit),
+    currentPage: page,
+  };
+};
+
 const updatePrivileges = async (uuid, privileges) => {
   const admin = await prisma.admin.update({
     where: { uuid: uuid },
@@ -172,6 +216,7 @@ module.exports = {
   createSubAdmin,
   editSubAdmin,
   getSubAdminDetails,
+  getAllSubAdmins,
   updatePrivileges,
   updatePrivilegeStatus
 };

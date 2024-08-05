@@ -50,6 +50,16 @@ const getSubAdminDetails = async (req, res, next) => {
   }
 };
 
+const getAllSubAdmins = async (req, res, next) => {
+  try {
+    const { search = '', page = 1, limit = 10 } = req.query;
+    const result = await AdminService.getAllSubAdmins(search, parseInt(page), parseInt(limit));
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const updatePrivileges = async (req, res, next) => {
   try {
     const updatedAdmin = await AdminService.updatePrivileges(req.params.uuid, req.body.privileges);
@@ -84,6 +94,7 @@ module.exports = {
   createSubAdmin,
   editSubAdmin,
   getSubAdminDetails,
+  getAllSubAdmins,
   updatePrivileges,
   updatePrivilegeStatus
 };

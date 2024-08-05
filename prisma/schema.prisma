@@ -60,11 +60,13 @@ model User {
 
 model Admin {
   uuid       String           @id @default(uuid())
-  username   String
+  username   String           @unique
   email      String           @unique
   password   String
   isSuper    Boolean          @default(false)
   privileges AdminPrivilege[]
+  status     Boolean          @default(true)
+  token      String?         
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
 }
