@@ -9,17 +9,20 @@ datasource db {
 }
 
 model User {
-  id              Int      @default(autoincrement())
-  uuid            String   @id @unique @default(uuid()) @db.Uuid
-  username        String   @unique
-  email           String   @unique
+  id              Int        @default(autoincrement())
+  uuid            String     @id @unique @default(uuid()) @db.Uuid
+  username        String     @unique
+  email           String     @unique
   referralCode    String
   referredBy      String?
-  token           Json?    @default("[]")
+  token           Json?      @default("[]")
   bcWallet        BigInt?
   comissionWallet Float?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @default(now())
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @default(now())
+  otp             Int?
+  Referral        Referral[]
+  ParentReferral  Referral[] @relation("UserParent")
 }
 
 model Admin {
@@ -32,6 +35,7 @@ model Admin {
   updatedAt  DateTime         @updatedAt
   status     Boolean          @default(true)
   token      String?
+  otp        Int?
   privileges AdminPrivilege[]
 }
 
@@ -53,4 +57,12 @@ model AdminPrivilege {
   status              Boolean
   admin               Admin           @relation(fields: [adminUuid], references: [uuid])
   privilegeMaster     PrivilegeMaster @relation(fields: [privilegeMasterUuid], references: [uuid])
+}
+
+model Referral {
+  uuid     String  @id @default(uuid()) @db.Uuid
+  parentId String? @db.Uuid
+  userId   String  @db.Uuid
+  user     User    @relation(fields: [userId], references: [uuid])
+  parent   User?   @relation("UserParent", fields: [parentId], references: [uuid])
 }
