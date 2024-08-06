@@ -20,7 +20,7 @@ module.exports.ifReferralUsedAlready = async (code) => {
 module.exports.referralCode = async () => {
     let code = await generateReferral();
     while (await ifReferralUsedAlready(code)) {
-        code = code = generateReferral();
+        code = generateReferral();
     }
     if (!code) throw new Error("Code not generated");
     return code;

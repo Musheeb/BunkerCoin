@@ -1,20 +1,21 @@
 // src/services/adminService.js
 const prisma = require('../../config/prismaClient');
 const bcryptUtil = require('../../modules/bcryptUtil');
+const jwt = require('jsonwebtoken');
 
 
 const createAdmin = async (data) => {
   const hashedPassword = await bcryptUtil.hashPassword(data.password);
   const admin = await prisma.admin.create({
     data: {
-      uuid: prisma.uuid(),
+      //uuid: prisma.uuid(),
       username: data.username,
       email: data.email,
       password: hashedPassword,
       isSuper: data.isSuper || false,
       privileges: {
         create: data.privileges.map(privilege => ({
-          uuid: prisma.uuid(),
+          //uuid: prisma.uuid(),
           privilegeMasterUuid: privilege.privilegeMasterUuid,
           status: privilege.status
         }))
@@ -45,7 +46,19 @@ const loginAdmin = async (data) => {
   });
 
   if (admin && await bcryptUtil.comparePassword(data.password, admin.password)) {
-    return admin;
+    const token = jwt.sign(
+      { uuid: admin.uuid, email: admin.email, isSuper: admin.isSuper },
+      process.env.JWT_SECRET, // Define this in your .env file
+      { expiresIn: '8h' } // Token expiration time
+    );
+
+    // Save the token in the database
+    await prisma.admin.update({
+      where: { email: data.email },
+      data: { token: token }
+    });
+
+    return { admin, token };
   } else {
     throw new Error('Invalid email or password');
   }
@@ -210,6 +223,29 @@ const updatePrivilegeStatus = async (uuid, status) => {
   return updatedPrivilege;
 };
 
+const updateAdminStatus = async (uuid, status) => {
+  if (typeof status !== 'boolean') {
+    throw new Error('Status must be a boolean');
+  }
+
+  // Prepare the data to update
+  const updateData = { status: status };
+  if (!status) {
+    // If deactivating, clear the token
+    updateData.token = null;
+  }
+
+  try {
+    const updatedAdmin = await prisma.admin.update({
+      where: { uuid: uuid },
+      data: updateData
+    });
+    return updatedAdmin;
+  } catch (err) {
+    throw new Error('Internal Server Error');
+  }
+};
+
 module.exports = {
   createAdmin,
   loginAdmin,
@@ -218,5 +254,6 @@ module.exports = {
   getSubAdminDetails,
   getAllSubAdmins,
   updatePrivileges,
-  updatePrivilegeStatus
+  updatePrivilegeStatus,
+  updateAdminStatus
 };

@@ -88,6 +88,23 @@ const updatePrivilegeStatus = async (req, res, next) => {
   }
 };
 
+const updateAdminStatus = async (req, res) => {
+  const { uuid } = req.params;
+  const { status } = req.body;
+
+  try {
+    const updatedAdmin = await AdminService.updateAdminStatus(uuid, status);
+    res.json(updatedAdmin);
+  } catch (err) {
+    if (err.message === 'Status must be a boolean') {
+      res.status(400).json({ error: err.message });
+    } else {
+      console.error(err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
+};
+
 module.exports = {
   createAdmin,
   loginAdmin,
@@ -96,5 +113,6 @@ module.exports = {
   getSubAdminDetails,
   getAllSubAdmins,
   updatePrivileges,
-  updatePrivilegeStatus
+  updatePrivilegeStatus,
+  updateAdminStatus
 };
