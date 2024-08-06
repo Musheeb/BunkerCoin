@@ -13,4 +13,8 @@ module.exports = (app) => {
   app.put('/admin/:uuid/privileges', AdminController.updatePrivileges);
   app.patch('/admin/privileges/:uuid/status', AdminController.updatePrivilegeStatus);
   app.patch('/admin/:uuid/status', AdminController.updateAdminStatus);
+  // router.patch('/admin/:uuid/change-password', authenticateJWT, ensureSuperAdmin, AdminController.changeAdminPassword);
+  app.post('/admin/:uuid/change-password', AdminController.changePassword);
+  app.post('/logout', AdminController.logoutAdmin);
+
 };
