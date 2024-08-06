@@ -50,6 +50,16 @@ const getSubAdminDetails = async (req, res, next) => {
   }
 };
 
+const getAllSubAdmins = async (req, res, next) => {
+  try {
+    const { search = '', page = 1, limit = 10 } = req.query;
+    const result = await AdminService.getAllSubAdmins(search, parseInt(page), parseInt(limit));
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const updatePrivileges = async (req, res, next) => {
   try {
     const updatedAdmin = await AdminService.updatePrivileges(req.params.uuid, req.body.privileges);
@@ -78,12 +88,31 @@ const updatePrivilegeStatus = async (req, res, next) => {
   }
 };
 
+const updateAdminStatus = async (req, res) => {
+  const { uuid } = req.params;
+  const { status } = req.body;
+
+  try {
+    const updatedAdmin = await AdminService.updateAdminStatus(uuid, status);
+    res.json(updatedAdmin);
+  } catch (err) {
+    if (err.message === 'Status must be a boolean') {
+      res.status(400).json({ error: err.message });
+    } else {
+      console.error(err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
+};
+
 module.exports = {
   createAdmin,
   loginAdmin,
   createSubAdmin,
   editSubAdmin,
   getSubAdminDetails,
+  getAllSubAdmins,
   updatePrivileges,
-  updatePrivilegeStatus
+  updatePrivilegeStatus,
+  updateAdminStatus
 };

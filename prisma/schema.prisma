@@ -1,13 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-// generator client {
-//   provider = "prisma-client-js"
-// }
-
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-1.0.x"]
@@ -19,54 +9,34 @@ datasource db {
 }
 
 model User {
-  id        Int      @default(autoincrement())
-  uuid      String   @id @unique @default(uuid()) @db.Uuid
-  username  String   @unique
-  email     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  id              Int        @default(autoincrement())
+  uuid            String     @id @unique @default(uuid()) @db.Uuid
+  username        String     @unique
+  email           String     @unique
+  referralCode    String
+  referredBy      String?
+  token           Json?      @default("[]")
+  bcWallet        BigInt?
+  comissionWallet Float?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @default(now())
+  otp             Int?
+  Referral        Referral[]
+  ParentReferral  Referral[] @relation("UserParent")
 }
-
-// model Admin {
-//   uuid      String          @id @default(uuid())
-//   username  String
-//   email     String          @unique
-//   password  String
-//   isSuper   Boolean         @default(false)
-//   privileges AdminPrivilege[]
-//   createdAt DateTime        @default(now())
-//   updatedAt DateTime        @updatedAt
-// }
-
-// model PrivilegeMaster {
-//   uuid        String   @id @default(uuid())
-//   name        String
-//   description String
-//   adminPrivileges AdminPrivilege[]
-//   createdAt   DateTime @default(now())
-//   updatedAt   DateTime @updatedAt
-// }
-
-// model AdminPrivilege {
-//   uuid            String         @id @default(uuid())
-//   status          String
-//   adminUuid       String
-//   privilegeMasterUuid String
-//   admin           Admin          @relation(fields: [adminUuid], references: [uuid])
-//   privilegeMaster PrivilegeMaster @relation(fields: [privilegeMasterUuid], references: [uuid])
-//   createdAt       DateTime       @default(now())
-//   updatedAt       DateTime       @updatedAt
-// }
 
 model Admin {
   uuid       String           @id @default(uuid())
-  username   String
+  username   String           @unique
   email      String           @unique
   password   String
   isSuper    Boolean          @default(false)
-  privileges AdminPrivilege[]
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
+  status     Boolean          @default(true)
+  token      String?
+  otp        Int?
+  privileges AdminPrivilege[]
 }
 
 model PrivilegeMaster {
@@ -80,11 +50,19 @@ model PrivilegeMaster {
 
 model AdminPrivilege {
   uuid                String          @id @default(uuid())
-  status              Boolean
   adminUuid           String
   privilegeMasterUuid String
-  admin               Admin           @relation(fields: [adminUuid], references: [uuid])
-  privilegeMaster     PrivilegeMaster @relation(fields: [privilegeMasterUuid], references: [uuid])
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
+  status              Boolean
+  admin               Admin           @relation(fields: [adminUuid], references: [uuid])
+  privilegeMaster     PrivilegeMaster @relation(fields: [privilegeMasterUuid], references: [uuid])
+}
+
+model Referral {
+  uuid     String  @id @default(uuid()) @db.Uuid
+  parentId String? @db.Uuid
+  userId   String  @db.Uuid
+  user     User    @relation(fields: [userId], references: [uuid])
+  parent   User?   @relation("UserParent", fields: [parentId], references: [uuid])
 }
