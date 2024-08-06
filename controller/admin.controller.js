@@ -105,6 +105,34 @@ const updateAdminStatus = async (req, res) => {
   }
 };
 
+
+const changePassword = async (req, res) => {
+  const { uuid } = req.params;
+  const { oldPassword, newPassword, otp } = req.body;
+
+  try {
+    const result = await AdminService.changePassword(uuid, oldPassword, newPassword, otp);
+    res.json(result);
+  } catch (err) {
+    if (err.message === 'Invalid old password' || err.message === 'Invalid OTP' || err.message === 'Admin not found') {
+      res.status(400).json({ error: err.message });
+    } else {
+      console.error(err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
+};
+
+const logoutAdmin = async (req, res) => {
+  try {
+    await AdminService.logoutAdmin(req.user.uuid);
+    res.sendStatus(200); // OK
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500); // Internal Server Error
+  }
+};
+
 module.exports = {
   createAdmin,
   loginAdmin,
@@ -114,5 +142,7 @@ module.exports = {
   getAllSubAdmins,
   updatePrivileges,
   updatePrivilegeStatus,
-  updateAdminStatus
+  updateAdminStatus,
+  changePassword,
+  logoutAdmin
 };

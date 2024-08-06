@@ -246,6 +246,72 @@ const updateAdminStatus = async (uuid, status) => {
   }
 };
 
+
+const changePassword = async (uuid, oldPassword, newPassword, otp) => {
+  try {
+    const admin = await prisma.admin.findUnique({
+      where: { uuid: uuid }
+    });
+
+    if (!admin) {
+      throw new Error('Admin not found');
+    }
+
+    if (!otp) {
+      const isPasswordValid = await bcryptUtil.comparePassword(oldPassword, admin.password);
+      if (!isPasswordValid) {
+        throw new Error('Invalid old password');
+      }
+
+      // Generate OTP
+      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+      // Save OTP and new password temporarily in the database
+      await prisma.admin.update({
+        where: { uuid: uuid },
+        data: {
+          otp: generatedOtp,
+          //tempPassword: await bcryptUtil.hashPassword(newPassword)
+        }
+      });
+
+      // Send OTP to admin's email
+     // await sendOtpEmail(admin.email, generatedOtp);
+
+      return { message: 'OTP sent to email' };
+    } else {
+      if (admin.otp !== otp) {
+        throw new Error('Invalid OTP');
+      }
+
+      // Update password with the new password
+      const updatedAdmin = await prisma.admin.update({
+        where: { uuid: uuid },
+        data: {
+          password: newPassword,
+          otp: null,
+          //tempPassword: null
+        }
+      });
+
+      return updatedAdmin;
+    }
+  } catch (err) {
+    throw err;
+  }
+};
+
+const logoutAdmin = async (uuid) => {
+  try {
+    await prisma.admin.update({
+      where: { uuid: uuid },
+      data: { token: null }
+    });
+  } catch (err) {
+    throw new Error('Internal Server Error');
+  }
+};
+
 module.exports = {
   createAdmin,
   loginAdmin,
@@ -255,5 +321,7 @@ module.exports = {
   getAllSubAdmins,
   updatePrivileges,
   updatePrivilegeStatus,
-  updateAdminStatus
+  updateAdminStatus,
+  changePassword,
+  logoutAdmin
 };
