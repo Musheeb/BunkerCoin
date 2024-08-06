@@ -57,7 +57,9 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(400).send({
     error: 'Internal Server Error',
-    message: err.message
+    message: err.name,
+    data: err.message,
+    completeErrorObject: err
   });
 });
 
