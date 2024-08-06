@@ -19,10 +19,11 @@ model User {
   bcWallet        BigInt?
   comissionWallet Float?
   createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
   otp             Int?
   Referral        Referral[]
   ParentReferral  Referral[] @relation("UserParent")
+  status          Boolean?
 }
 
 model Admin {
@@ -46,6 +47,7 @@ model PrivilegeMaster {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   AdminPrivilege AdminPrivilege[]
+  status         Boolean?
 }
 
 model AdminPrivilege {
