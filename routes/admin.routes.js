@@ -6,6 +6,8 @@ const ensureSuperAdmin = require('../middlewares/ensureSuperAdmin');
 module.exports = (app) => {
   app.post('/admin', AdminController.createAdmin);
   app.post('/admin/login', AdminController.loginAdmin);
+  app.post('/admin/verify-otp', AdminController.verifyOtp);
+  app.post('/admin/resend-otp', AdminController.resendOtp);
   app.post('/admin/sub-admin', authenticateJWT, AdminController.createSubAdmin);
   app.patch('/admin/sub-admin/:uuid', AdminController.editSubAdmin);
   app.get('/admin/sub-admin/:uuid', AdminController.getSubAdminDetails);
