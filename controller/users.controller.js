@@ -1,7 +1,9 @@
 const UserService = require('../service/users/usersService');
+const nodemailer = require('../modules/notifications/emails/sendEmail');
+const Tools = require("../modules/tools");
 const { UserSchema } = require('../modules/validation/users');
 const { validate } = require('../modules/validation/validate');
-const Tools = require("../modules/tools");
+const { referralCode } = require('../modules/referralCode');
 
 const registration = async (req, res, next) => {
     try {
@@ -14,9 +16,17 @@ const registration = async (req, res, next) => {
             fcmToken: null
         };
         body.otp = otp;
+        body.referralCode = await referralCode();
         const user = await UserService.create(body);
-        res.send(user);
-        // if (user) //send OTP for verification. 
+        res.send({
+            message: req.t('otpHasSendToEmail'),
+            data: user
+        });
+        //send OTP for verification. 
+        if (user) nodemailer.sendEmail(
+            user.email,
+            Tools.mailBody('Your OTP for Login', otp, user),
+            'user');
     } catch (error) {
         next(error);
     }

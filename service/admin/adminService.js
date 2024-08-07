@@ -3,11 +3,11 @@ const prisma = require('../../config/prismaClient');
 const bcryptUtil = require('../../modules/bcryptUtil');
 const jwt = require('jsonwebtoken');
 const nodeMailer = require('../../modules/notifications/emails/sendEmail');
-
+const Tools = require('../../modules/tools');
 
 
 const generateOtp = () => {
-  return Math.floor(100000 + Math.random() * 900000); 
+  return Math.floor(100000 + Math.random() * 900000);
 };
 
 
@@ -62,15 +62,9 @@ const loginAdmin = async (data) => {
       data: { otp: otp }
     });
 
-   // For User
+    // For User
     const userRecipient = data.email;
-    const userMailBody = {
-        subject: 'Your OTP for Login',
-        context: {
-            otp: otp, // Generate OTP dynamically
-            name: admin.username
-        }
-    };
+    const userMailBody = Tools.mailBody('Your OTP for Login', otp, admin);
     await nodeMailer.sendEmail(userRecipient, userMailBody, 'admin');
 
     return { message: 'OTP sent to email' };
@@ -126,11 +120,11 @@ const resendOtp = async (email) => {
 
   const userRecipient = admin.email;
   const userMailBody = {
-      subject: 'Resend OTP for Login',
-      context: {
-          otp: otp, // Generate OTP dynamically
-          name: admin.username
-      }
+    subject: 'Resend OTP for Login',
+    context: {
+      otp: otp, // Generate OTP dynamically
+      name: admin.username
+    }
   };
   await nodeMailer.sendEmail(userRecipient, userMailBody, 'user');
 
@@ -176,7 +170,7 @@ const editSubAdmin = async (uuid, data) => {
       privileges: {
         deleteMany: {},
         create: data.privileges.map(privilege => ({
-         // uuid: prisma.uuid(),
+          // uuid: prisma.uuid(),
           privilegeMasterUuid: privilege.privilegeMasterUuid,
           status: privilege.status
         }))
@@ -349,7 +343,7 @@ const changePassword = async (uuid, oldPassword, newPassword, otp) => {
       });
 
       // Send OTP to admin's email
-     // await sendOtpEmail(admin.email, generatedOtp);
+      // await sendOtpEmail(admin.email, generatedOtp);
 
       return { message: 'OTP sent to email' };
     } else {
