@@ -19,36 +19,42 @@ model User {
   bcWallet        BigInt?
   comissionWallet Float?
   createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
   otp             Int?
   Referral        Referral[]
   ParentReferral  Referral[] @relation("UserParent")
+  status          Boolean?
 }
 
 model Admin {
-  uuid       String           @id @default(uuid())
-  username   String           @unique
-  email      String           @unique
-  password   String
-  isSuper    Boolean          @default(false)
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
-  status     Boolean          @default(true)
-  token      String?
-  otp        Int?
-  privileges AdminPrivilege[]
+  id                  Int                   @default(autoincrement())
+  uuid                String                @id @default(uuid())
+  username            String                @unique
+  email               String                @unique
+  password            String
+  isSuper             Boolean               @default(false)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  status              Boolean               @default(true)
+  token               String?
+  otp                 Int?
+  privileges          AdminPrivilege[]
+  AdminBunkerCoinPool AdminBunkerCoinPool[] // Relationship with AdminBunkerCoinPool
 }
 
 model PrivilegeMaster {
+  id             Int              @default(autoincrement())
   uuid           String           @id @default(uuid())
   name           String
   description    String
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   AdminPrivilege AdminPrivilege[]
+  status         Boolean?
 }
 
 model AdminPrivilege {
+  id                  Int             @default(autoincrement())
   uuid                String          @id @default(uuid())
   adminUuid           String
   privilegeMasterUuid String
@@ -60,9 +66,49 @@ model AdminPrivilege {
 }
 
 model Referral {
+  id       Int     @default(autoincrement())
   uuid     String  @id @default(uuid()) @db.Uuid
   parentId String? @db.Uuid
   userId   String  @db.Uuid
   user     User    @relation(fields: [userId], references: [uuid])
   parent   User?   @relation("UserParent", fields: [parentId], references: [uuid])
+}
+
+model AdminBunkerCoinPool {
+  id              Int      @default(autoincrement())
+  uuid            String   @id @default(uuid()) @db.Uuid
+  adminId         String
+  admin           Admin    @relation(fields: [adminId], references: [uuid])
+  bunkercoin      Int
+  totalBunkercoin Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Configuration {
+  id        Int      @default(autoincrement())
+  uuid      String   @id @default(uuid()) @db.Uuid
+  key       String
+  value     Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum BunkerMarketDevStatus {
+  CURRENT
+  SOLD
+  UNSOLD
+}
+
+model BunkerMarketDev {
+  id              Int                   @default(autoincrement())
+  uuid            String                @id @default(uuid()) @db.Uuid
+  coinsToBeSold   BigInt
+  coinsSold       BigInt
+  coinsUnsold     BigInt
+  rate            Decimal
+  fundsToBeRaised BigInt
+  fundsRaised     BigInt
+  fundsRemained   BigInt
+  status          BunkerMarketDevStatus @default(UNSOLD)
 }

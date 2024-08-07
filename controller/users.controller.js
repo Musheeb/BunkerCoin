@@ -1,4 +1,5 @@
 const UserService = require('../service/users/usersService');
+const UserSchema = require('../modules/validation/users');
 
 const registration = async (req, res, next) => {
     try {
