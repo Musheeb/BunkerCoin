@@ -2,6 +2,14 @@
 const prisma = require('../../config/prismaClient');
 const bcryptUtil = require('../../modules/bcryptUtil');
 const jwt = require('jsonwebtoken');
+const nodeMailer = require('../../modules/notifications/emails/sendEmail');
+
+
+
+const generateOtp = () => {
+  return Math.floor(100000 + Math.random() * 900000); 
+};
+
 
 
 const createAdmin = async (data) => {
@@ -32,8 +40,8 @@ const createAdmin = async (data) => {
   return admin;
 };
 
+
 const loginAdmin = async (data) => {
-  console.log(data)
   const admin = await prisma.admin.findUnique({
     where: { email: data.email },
     include: {
@@ -46,22 +54,87 @@ const loginAdmin = async (data) => {
   });
 
   if (admin && await bcryptUtil.comparePassword(data.password, admin.password)) {
-    const token = jwt.sign(
-      { uuid: admin.uuid, email: admin.email, isSuper: admin.isSuper },
-      process.env.JWT_SECRET, // Define this in your .env file
-      { expiresIn: '8h' } // Token expiration time
-    );
+    const otp = generateOtp();
 
-    // Save the token in the database
+    // Save the OTP in the database
     await prisma.admin.update({
       where: { email: data.email },
-      data: { token: token }
+      data: { otp: otp }
     });
 
-    return { admin, token };
+   // For User
+    const userRecipient = data.email;
+    const userMailBody = {
+        subject: 'Your OTP for Login',
+        context: {
+            otp: otp, // Generate OTP dynamically
+            name: admin.username
+        }
+    };
+    await nodeMailer.sendEmail(userRecipient, userMailBody, 'admin');
+
+    return { message: 'OTP sent to email' };
   } else {
     throw new Error('Invalid email or password');
   }
+};
+
+
+// Verify OTP and issue token
+const verifyOtp = async (email, otp) => {
+  const admin = await prisma.admin.findUnique({
+    where: { email: email }
+  });
+
+  if (!admin || admin.otp !== parseInt(otp, 10)) { // Convert OTP to integer for comparison
+    throw new Error('Invalid OTP');
+  }
+
+  const token = jwt.sign(
+    { uuid: admin.uuid, email: admin.email, isSuper: admin.isSuper },
+    process.env.JWT_SECRET, // Define this in your .env file
+    { expiresIn: '8h' } // Token expiration time
+  );
+
+  // Save the token in the database
+  await prisma.admin.update({
+    where: { email: email },
+    data: { token: token, otp: null } // Clear OTP after successful verification
+  });
+
+  return { admin, token };
+};
+
+
+// Resend OTP
+const resendOtp = async (email) => {
+  const admin = await prisma.admin.findUnique({
+    where: { email: email }
+  });
+
+  if (!admin) {
+    throw new Error('Admin not found');
+  }
+
+  const otp = generateOtp(); // Generate OTP as integer
+
+  // Save the OTP in the database
+  await prisma.admin.update({
+    where: { email: email },
+    data: { otp: otp }
+  });
+
+  const userRecipient = admin.email;
+  const userMailBody = {
+      subject: 'Resend OTP for Login',
+      context: {
+          otp: otp, // Generate OTP dynamically
+          name: admin.username
+      }
+  };
+  await nodeMailer.sendEmail(userRecipient, userMailBody, 'user');
+
+  return { message: 'OTP resent to email' };
 };
 
 const createSubAdmin = async (data) => {
@@ -323,5 +396,7 @@ module.exports = {
   updatePrivilegeStatus,
   updateAdminStatus,
   changePassword,
-  logoutAdmin
+  logoutAdmin,
+  verifyOtp,
+  resendOtp
 };

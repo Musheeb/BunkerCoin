@@ -19,6 +19,31 @@ const loginAdmin = async (req, res, next) => {
   }
 };
 
+const verifyOtp = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const result = await AdminService.verifyOtp(email, otp);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
+};
+
+const resendOtp = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const result = await AdminService.resendOtp(email);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
+};
+
+
 const createSubAdmin = async (req, res, next) => {
   try {
     const subAdmin = await AdminService.createSubAdmin(req.body);
@@ -144,5 +169,7 @@ module.exports = {
   updatePrivilegeStatus,
   updateAdminStatus,
   changePassword,
-  logoutAdmin
+  logoutAdmin,
+  verifyOtp,
+  resendOtp
 };
