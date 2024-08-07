@@ -20,3 +20,14 @@ const generateJWT = function (duration, dataToStore) {
     return token;
 };
 exports.generateJWT = generateJWT;
+
+const mailBody = function (subject, otp, data) {
+    return {
+        subject: subject,
+        context: {
+            otp: otp, // Generate OTP dynamically
+            name: data.username
+        }
+    };
+};
+exports.mailBody = mailBody;
