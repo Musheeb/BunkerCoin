@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "BunkerMarketDev" ALTER COLUMN "coinsSold" SET DEFAULT 0,
+ALTER COLUMN "coinsUnsold" SET DEFAULT 0,
+ALTER COLUMN "fundsRaised" SET DEFAULT 0,
+ALTER COLUMN "fundsRemained" SET DEFAULT 0;
