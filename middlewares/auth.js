@@ -16,7 +16,7 @@ const authenticateJWT = async (req, res, next) => {
         req.user = decoded;
         next();
       } else {
-        res.status(403).send({
+        res.status(401).send({
           response: "Failed",
           message: "Unauthorized: Token does not match"
         });
@@ -28,12 +28,12 @@ const authenticateJWT = async (req, res, next) => {
           message: "Unauthorized: Token has expired"
         });
       } else if (err.name === 'JsonWebTokenError') {
-        res.status(403).send({
+        res.status(401).send({
           response: "Failed",
           message: "Unauthorized: Invalid token"
         });
       } else {
-        res.status(403).send({
+        res.status(401).send({
           response: "Failed",
           message: "Unauthorized"
         });
@@ -48,3 +48,9 @@ const authenticateJWT = async (req, res, next) => {
 };
 
 module.exports = authenticateJWT;
+
+//For user registration only to authenticate the temporary JWT on OTP verification.
+const registrationAuth = async (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1]; // Assumes "Bearer <token>"
+};
+exports.registrationAuth = registrationAuth;

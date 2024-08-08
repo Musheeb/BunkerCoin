@@ -4,7 +4,7 @@
     "already_registered": "Benutzer bereits registriert",
     "something_went_wrong": "Ups! Etwas ist schiefgelaufen",
     "register_success": "Herzlichen Glückwunsch! Sie haben sich erfolgreich registriert",
-    "user_not_found": "Benutzer nicht gefunden",
+    "userNotFound": "Benutzer nicht gefunden",
     "blocked_user": "Sie sind gesperrt",
     "login_successfully": "Erfolgreich eingeloggt",
     "invalid_credentials": "E-Mail oder Passwort ist falsch",

@@ -9,22 +9,25 @@ datasource db {
 }
 
 model User {
-  id              Int        @default(autoincrement())
-  uuid            String     @id @unique @default(uuid()) @db.Uuid
-  username        String     @unique
-  email           String     @unique
-  referralCode    String?
-  referredBy      String?
-  token           Json?      @default("[]")
-  bcWallet        BigInt?
-  comissionWallet Float?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-  otp             Int?
-  Referral        Referral[]
-  ParentReferral  Referral[] @relation("UserParent")
-  status          Boolean?   @default(true)
-  isEmailVerified Boolean?   @default(false)
+  id                 Int        @default(autoincrement())
+  uuid               String     @id @unique @default(uuid()) @db.Uuid
+  username           String     @unique
+  email              String     @unique
+  referralCode       String?
+  referredBy         String?
+  token              Json?      @default("[]")
+  bcWallet           BigInt?
+  comissionWallet    Float?
+  profilePicture     String?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  otp                Int?
+  Referral           Referral[]
+  ParentReferral     Referral[] @relation("UserParent")
+  status             Boolean?   @default(true)
+  isEmailVerified    Boolean?   @default(false)
+  loginCount         Int?       @default(0)
+  lastLoginTimestamp DateTime?
 }
 
 model Admin {
@@ -34,6 +37,7 @@ model Admin {
   email               String                @unique
   password            String
   isSuper             Boolean               @default(false)
+  profilePicture      String?
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   status              Boolean               @default(true)
@@ -51,7 +55,7 @@ model PrivilegeMaster {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   AdminPrivilege AdminPrivilege[]
-  status         Boolean?
+  status         Boolean?         @default(true)
 }
 
 model AdminPrivilege {
@@ -61,7 +65,7 @@ model AdminPrivilege {
   privilegeMasterUuid String
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
-  status              Boolean
+  status              Boolean         @default(true)
   admin               Admin           @relation(fields: [adminUuid], references: [uuid])
   privilegeMaster     PrivilegeMaster @relation(fields: [privilegeMasterUuid], references: [uuid])
 }
@@ -80,7 +84,7 @@ model AdminBunkerCoinPool {
   uuid            String   @id @default(uuid()) @db.Uuid
   adminId         String
   admin           Admin    @relation(fields: [adminId], references: [uuid])
-  bunkercoin      Int
+  bunkercoin      BigInt
   totalBunkercoin Int
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -102,14 +106,15 @@ enum BunkerMarketDevStatus {
 }
 
 model BunkerMarketDev {
-  id              Int                   @default(autoincrement())
-  uuid            String                @id @default(uuid()) @db.Uuid
-  coinsToBeSold   BigInt
-  coinsSold       BigInt
-  coinsUnsold     BigInt
-  rate            Decimal
-  fundsToBeRaised BigInt
-  fundsRaised     BigInt
-  fundsRemained   BigInt
-  status          BunkerMarketDevStatus @default(UNSOLD)
+  id               Int                   @default(autoincrement())
+  uuid             String                @id @default(uuid()) @db.Uuid
+  coinsToBeSold    BigInt
+  coinsSold        BigInt                @default(0)
+  coinsUnsold      BigInt                @default(0)
+  onePercentOfFund BigInt                @default(0)
+  rate             Decimal
+  fundsToBeRaised  BigInt
+  fundsRaised      BigInt                @default(0)
+  fundsRemained    BigInt                @default(0)
+  status           BunkerMarketDevStatus @default(UNSOLD)
 }
