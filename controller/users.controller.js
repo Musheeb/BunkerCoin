@@ -1,7 +1,10 @@
 const UserService = require('../service/users/usersService');
+const { UserSchema } = require('../modules/validation/users');
+const { validate } = require('../modules/validation/validate');
 
 const registration = async (req, res, next) => {
     try {
+        validate(UserSchema.POST, req.body);
         const body = req.body;
         const user = await UserService.create(body);
         res.send(user);
