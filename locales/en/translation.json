@@ -21,5 +21,6 @@
     "all_users": "All users are given below.",
     "user_blocked": "User inactive successfully.",
     "unblocked_user": "User active successfully",
-    "otpSend": "OTP sent to email"
+    "otpSend": "OTP sent to email",
+    "otpHasSendToEmail": "OTP has sent to email"
 }

@@ -63,16 +63,9 @@ const loginAdmin = async (data) => {
     }
 
     let token = tools.generateJWT('10m',tokenData);
-
-   // For User
+    // For User
     const userRecipient = data.email;
-    const userMailBody = {
-        subject: 'Your OTP for Login',
-        context: {
-            otp: otp, // Generate OTP dynamically
-            name: admin.username
-        }
-    };
+    const userMailBody = Tools.mailBody('Your OTP for Login', otp, admin);
     await nodeMailer.sendEmail(userRecipient, userMailBody, 'admin');
 
     return { token };
@@ -136,11 +129,11 @@ const resendOtp = async (email) => {
 
   const userRecipient = admin.email;
   const userMailBody = {
-      subject: 'Resend OTP for Login',
-      context: {
-          otp: otp, // Generate OTP dynamically
-          name: admin.username
-      }
+    subject: 'Resend OTP for Login',
+    context: {
+      otp: otp, // Generate OTP dynamically
+      name: admin.username
+    }
   };
   await nodeMailer.sendEmail(userRecipient, userMailBody, 'user');
 
@@ -186,7 +179,7 @@ const editSubAdmin = async (uuid, data) => {
       privileges: {
         deleteMany: {},
         create: data.privileges.map(privilege => ({
-         // uuid: prisma.uuid(),
+          // uuid: prisma.uuid(),
           privilegeMasterUuid: privilege.privilegeMasterUuid,
           status: privilege.status
         }))
