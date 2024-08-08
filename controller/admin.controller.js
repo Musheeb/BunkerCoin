@@ -13,7 +13,11 @@ const createAdmin = async (req, res, next) => {
 const loginAdmin = async (req, res, next) => {
   try {
     const admin = await AdminService.loginAdmin(req.body);
-    res.status(200).json(admin);
+    return res.status(200).send({
+      response: "success",
+      message: req.t("otpSend"),
+      token:admin.token
+  });
   } catch (error) {
     next(error);
   }
