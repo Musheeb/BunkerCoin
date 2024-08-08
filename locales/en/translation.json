@@ -4,7 +4,7 @@
     "already_registered": "User already registered.",
     "something_went_wrong": "Ooops! Something went wrong1.",
     "register_success": "Congratulations! You have registered successfully.",
-    "user_not_found": "User not found.",
+    "userNotFound": "User not found.",
     "blocked_user": "You are blocked.",
     "login_successfully": "Logged in successfully",
     "invalid_credentials": "Email or password is incorrect",
@@ -21,5 +21,12 @@
     "all_users": "All users are given below.",
     "user_blocked": "User inactive successfully.",
     "unblocked_user": "User active successfully",
-    "otpHasSendToEmail": "OTP has sent to email"
+    "otpHasSendToEmail": "OTP has sent to email",
+    "invalidOTP": "Incorrect OTP",
+    "referralCodeRequired": "Referral code cannot be empty",
+    "invalidToken": "Invalid token found",
+    "otpVerifiedLoggingIn": "OTP verified. Loggin in...",
+    "unauthorised": "Unauthorised",
+    "sessionExpired": "Your session has expired. Please request a new OTP to continue.",
+    "userAlreadyVerified": "User has already been verified"
 }
