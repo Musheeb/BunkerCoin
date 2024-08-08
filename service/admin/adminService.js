@@ -2,6 +2,9 @@
 const prisma = require('../../config/prismaClient');
 const bcryptUtil = require('../../modules/bcryptUtil');
 const jwt = require('jsonwebtoken');
+const nodeMailer = require('../../modules/notifications/emails/sendEmail');
+const tools = require('../../modules/tools')
+
 
 
 const createAdmin = async (data) => {
@@ -32,8 +35,8 @@ const createAdmin = async (data) => {
   return admin;
 };
 
+
 const loginAdmin = async (data) => {
-  console.log(data)
   const admin = await prisma.admin.findUnique({
     where: { email: data.email },
     include: {
@@ -46,22 +49,95 @@ const loginAdmin = async (data) => {
   });
 
   if (admin && await bcryptUtil.comparePassword(data.password, admin.password)) {
-    const token = jwt.sign(
-      { uuid: admin.uuid, email: admin.email, isSuper: admin.isSuper },
-      process.env.JWT_SECRET, // Define this in your .env file
-      { expiresIn: '8h' } // Token expiration time
-    );
+    const otp = tools.generate6DigitOTP();
 
-    // Save the token in the database
+    // Save the OTP in the database
     await prisma.admin.update({
       where: { email: data.email },
-      data: { token: token }
+      data: { otp: otp }
     });
 
-    return { admin, token };
+    let tokenData = {
+      email:data.email,
+      date: new Date()
+    }
+
+    let token = tools.generateJWT('10m',tokenData);
+    // For User
+    const userRecipient = data.email;
+    const userMailBody = Tools.mailBody('Your OTP for Login', otp, admin);
+    await nodeMailer.sendEmail(userRecipient, userMailBody, 'admin');
+
+    return { token };
   } else {
     throw new Error('Invalid email or password');
   }
+};
+
+
+// Verify OTP and issue token
+const verifyOtp = async (email, otp) => {
+  const admin = await prisma.admin.findUnique({
+    where: { email: email }
+  });
+
+  if (!admin || admin.otp !== parseInt(otp, 10)) { // Convert OTP to integer for comparison
+    throw new Error('Invalid OTP');
+  }
+
+
+  let tokenData = {
+    uuid: admin.uuid, email: admin.email, date: new Date()
+  }
+
+  let token = tools.generateJWT('30d',tokenData);
+
+  // Save the token in the database
+  await prisma.admin.update({
+    where: { email: email },
+    data: { token: token, otp: null } // Clear OTP after successful verification
+  });
+
+  return { admin, token };
+};
+
+
+// Resend OTP
+const resendOtp = async (email) => {
+  const admin = await prisma.admin.findUnique({
+    where: { email: email }
+  });
+
+  if (!admin) {
+    throw new Error('Admin not found');
+  }
+
+  const otp = tools.generate6DigitOTP(); // Generate OTP as integer
+
+  // Save the OTP in the database
+  await prisma.admin.update({
+    where: { email: email },
+    data: { otp: otp }
+  });
+
+  let tokenData = {
+    email:data.email,
+    date: new Date()
+  }
+
+  let token = tools.generateJWT('10m',tokenData);
+
+  const userRecipient = admin.email;
+  const userMailBody = {
+    subject: 'Resend OTP for Login',
+    context: {
+      otp: otp, // Generate OTP dynamically
+      name: admin.username
+    }
+  };
+  await nodeMailer.sendEmail(userRecipient, userMailBody, 'user');
+
+  return { message: 'OTP resent to email',token };
 };
 
 const createSubAdmin = async (data) => {
@@ -103,7 +179,7 @@ const editSubAdmin = async (uuid, data) => {
       privileges: {
         deleteMany: {},
         create: data.privileges.map(privilege => ({
-         // uuid: prisma.uuid(),
+          // uuid: prisma.uuid(),
           privilegeMasterUuid: privilege.privilegeMasterUuid,
           status: privilege.status
         }))
@@ -264,7 +340,7 @@ const changePassword = async (uuid, oldPassword, newPassword, otp) => {
       }
 
       // Generate OTP
-      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      const generatedOtp = tools.generate6DigitOTP()
 
       // Save OTP and new password temporarily in the database
       await prisma.admin.update({
@@ -274,9 +350,15 @@ const changePassword = async (uuid, oldPassword, newPassword, otp) => {
           //tempPassword: await bcryptUtil.hashPassword(newPassword)
         }
       });
-
-      // Send OTP to admin's email
-     // await sendOtpEmail(admin.email, generatedOtp);
+      const userRecipient = admin.email;
+      const userMailBody = {
+          subject: 'Resend OTP for Login',
+          context: {
+              otp: otp, // Generate OTP dynamically
+              name: admin.username
+          }
+      };
+      await nodeMailer.sendEmail(userRecipient, userMailBody, 'user');
 
       return { message: 'OTP sent to email' };
     } else {
@@ -323,5 +405,7 @@ module.exports = {
   updatePrivilegeStatus,
   updateAdminStatus,
   changePassword,
-  logoutAdmin
+  logoutAdmin,
+  verifyOtp,
+  resendOtp
 };

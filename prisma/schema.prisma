@@ -13,7 +13,7 @@ model User {
   uuid            String     @id @unique @default(uuid()) @db.Uuid
   username        String     @unique
   email           String     @unique
-  referralCode    String
+  referralCode    String?
   referredBy      String?
   token           Json?      @default("[]")
   bcWallet        BigInt?
@@ -23,7 +23,8 @@ model User {
   otp             Int?
   Referral        Referral[]
   ParentReferral  Referral[] @relation("UserParent")
-  status          Boolean?
+  status          Boolean?   @default(true)
+  isEmailVerified Boolean?   @default(false)
 }
 
 model Admin {

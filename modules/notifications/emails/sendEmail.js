@@ -1,6 +1,15 @@
 const nodemailer = require('nodemailer');
+const handlebars = require('handlebars');
+const fs = require('fs');
+const path = require('path');
 
-const sendEmail = async (recipient) => {
+/**
+ * 
+ * @param {String} recipient - Targeted email address.
+ * @param {Object} mailBody - Object, eg, Subject and Context in a single object.
+ * @param {String} templateName - Template name
+ */
+const sendEmail = async (recipient, mailBody, templateName) => {
     //Configure SMTP with nodemailer.
     const transporter = nodemailer.createTransport({
         host: process.env.SES_HOST || "email-smtp.eu-central-1.amazonaws.com",
@@ -11,16 +20,27 @@ const sendEmail = async (recipient) => {
             pass: process.env.SES_PASSWORD || "BOI+2xUhe4cuXANFEkWh77rnCIU1qcJAmE9OuRJ1ye+K"
         }
     });
+    // Load and compile the Handlebars template
+    const templatePath = path.resolve(process.cwd(), 'templates', `${templateName}.handlebars`);
+    const templateSource = fs.readFileSync(templatePath, 'utf8');
+    const template = handlebars.compile(templateSource);
+
+    // Generate the email body using the template
+    const html = template(mailBody.context);
+
+    // Use a template file with nodemailer
+    // transporter.use('compile', handlebars(handlebarOptions));
 
     const recipientEmail = recipient;
 
-    //Create email body.
+    // Create email body
     const mailOptions = {
         from: process.env.SES_FROM || 'museebnoorisys240@gmail.com',
         to: recipientEmail,
-        subject: "This is subject field",
-        text: "This is body"
-    }
+        subject: mailBody.subject,
+        html: html,
+        context: mailBody.context // Pass variables to the template
+    };
 
     //send Email.
     transporter.sendMail(mailOptions, (error, info) => {

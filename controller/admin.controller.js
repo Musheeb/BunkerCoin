@@ -13,11 +13,40 @@ const createAdmin = async (req, res, next) => {
 const loginAdmin = async (req, res, next) => {
   try {
     const admin = await AdminService.loginAdmin(req.body);
-    res.status(200).json(admin);
+    return res.status(200).send({
+      response: "success",
+      message: req.t("otpSend"),
+      token:admin.token
+  });
   } catch (error) {
     next(error);
   }
 };
+
+const verifyOtp = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const result = await AdminService.verifyOtp(email, otp);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
+};
+
+const resendOtp = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const result = await AdminService.resendOtp(email);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
+};
+
 
 const createSubAdmin = async (req, res, next) => {
   try {
@@ -144,5 +173,7 @@ module.exports = {
   updatePrivilegeStatus,
   updateAdminStatus,
   changePassword,
-  logoutAdmin
+  logoutAdmin,
+  verifyOtp,
+  resendOtp
 };
