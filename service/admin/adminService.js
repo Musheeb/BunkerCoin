@@ -65,7 +65,7 @@ const loginAdmin = async (data) => {
     let token = tools.generateJWT('10m',tokenData);
     // For User
     const userRecipient = data.email;
-    const userMailBody = Tools.mailBody('Your OTP for Login', otp, admin);
+    const userMailBody = tools.mailBody('Your OTP for Login', otp, admin);
     await nodeMailer.sendEmail(userRecipient, userMailBody, 'admin');
 
     return { token };
