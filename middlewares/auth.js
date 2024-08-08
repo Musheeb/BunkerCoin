@@ -17,25 +17,33 @@ const authenticateJWT = async (req, res, next) => {
         next();
       } else {
         res.status(403).send({
-            response: "Failed",
-            message: "unauthorised"
-         
+          response: "Failed",
+          message: "Unauthorized: Token does not match"
         });
-        //res.sendStatus(403); // Forbidden if token does not match
       }
     } catch (err) {
+      if (err.name === 'TokenExpiredError') {
+        res.status(401).send({
+          response: "Failed",
+          message: "Unauthorized: Token has expired"
+        });
+      } else if (err.name === 'JsonWebTokenError') {
         res.status(403).send({
-            response: "Failed",
-            message: "unauthorised"
-         
-        });// Forbidden if token verification fails
+          response: "Failed",
+          message: "Unauthorized: Invalid token"
+        });
+      } else {
+        res.status(403).send({
+          response: "Failed",
+          message: "Unauthorized"
+        });
+      }
     }
   } else {
     res.status(403).send({
-        response: "Failed",
-        message: "unauthorised"
-     
-    }); // Unauthorized if no token is provided
+      response: "Failed",
+      message: "Unauthorized: No token provided"
+    });
   }
 };
 

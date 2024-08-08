@@ -12,8 +12,11 @@ const middleware = require('i18next-http-middleware')
 const prisma = require('./config/prismaClient');
 
 const UsersRoutes = require('./routes/users.routes');
-const AdminRoutes = require('./routes/admin.routes')
-const PrivilegesRoutes = require('./routes/privilege.routes')
+const AdminRoutes = require('./routes/admin.routes');
+const PrivilegesRoutes = require('./routes/privilege.routes');
+const BunkerCoinPool = require('./routes/bunkerCoinPool.routes');
+const BunkerMaster = require('./routes/bunkerCoinMaster.routes');
+
 
 // const getPresignedUrl = require('./middlewares/S3/s3-presignedUrl');
 // getPresignedUrl("user/1722424470236-secondaryCare.jpeg");
@@ -43,6 +46,8 @@ app.use(morgan('dev'));
 UsersRoutes(app);
 AdminRoutes(app);
 PrivilegesRoutes(app);
+BunkerCoinPool(app);
+BunkerMaster(app);
 
 // Handle 404 (Not Found)
 app.use((req, res, next) => {
