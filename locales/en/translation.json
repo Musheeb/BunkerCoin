@@ -20,5 +20,6 @@
     "token_hasnt_verified": "Token hasn't verified.",
     "all_users": "All users are given below.",
     "user_blocked": "User inactive successfully.",
-    "unblocked_user": "User active successfully"
+    "unblocked_user": "User active successfully",
+    "otpSend": "OTP sent to email"
 }
