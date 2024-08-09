@@ -25,8 +25,10 @@
     "invalidOTP": "Incorrect OTP",
     "referralCodeRequired": "Referral code cannot be empty",
     "invalidToken": "Invalid token found",
-    "otpVerifiedLoggingIn": "OTP verified. Loggin in...",
+    "otpVerifiedLoggingIn": "OTP verified. Logging in...",
     "unauthorised": "Unauthorised",
     "sessionExpired": "Your session has expired. Please request a new OTP to continue.",
-    "userAlreadyVerified": "User has already been verified"
+    "userAlreadyVerified": "User has already been verified",
+    "userNotFoundWithTheGivenReferralCode": "No user found with the given referralCode in the database.",
+    "userIsAlreadyRegistered": "This email is already registered. Please choose a different email address to continue."
 }

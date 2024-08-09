@@ -117,4 +117,6 @@ model BunkerMarketDev {
   fundsRaised      BigInt                @default(0)
   fundsRemained    BigInt                @default(0)
   status           BunkerMarketDevStatus @default(UNSOLD)
+  createdAt        DateTime?             @default(now())
+  updatedAt        DateTime?             @updatedAt
 }
