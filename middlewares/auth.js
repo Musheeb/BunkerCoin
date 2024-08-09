@@ -7,6 +7,7 @@ const authenticateJWT = async (req, res, next) => {
   if (token) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
       const admin = await prisma.admin.findUnique({
         where: { uuid: decoded.uuid },
         select: { token: true } // Only select the token field
