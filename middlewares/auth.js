@@ -25,17 +25,20 @@ const authenticateJWT = async (req, res, next) => {
       if (err.name === 'TokenExpiredError') {
         res.status(401).send({
           response: "Failed",
-          message: "Unauthorized: Token has expired"
+          message: "Unauthorized: Token has expired",
+          error: err.message
         });
       } else if (err.name === 'JsonWebTokenError') {
         res.status(401).send({
           response: "Failed",
-          message: "Unauthorized: Invalid token"
+          message: "Unauthorized: Invalid token",
+          error: err.message
         });
       } else {
         res.status(401).send({
           response: "Failed",
-          message: "Unauthorized"
+          message: "Unauthorized",
+          error: err.message
         });
       }
     }
