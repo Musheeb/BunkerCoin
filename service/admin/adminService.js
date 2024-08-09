@@ -48,22 +48,24 @@ const loginAdmin = async (data) => {
     }
   });
 
+  let tokenData = {
+    email:data.email,
+    uuid : admin.uuid,
+    date: new Date()
+  }
+
+  let token = tools.generateJWT('10m',tokenData);
+
   if (admin && await bcryptUtil.comparePassword(data.password, admin.password)) {
     const otp = tools.generate6DigitOTP();
 
     // Save the OTP in the database
     await prisma.admin.update({
       where: { email: data.email },
-      data: { otp: otp }
+      data: { otp: otp, token: token }
     });
 
-    let tokenData = {
-      email:data.email,
-      uuid : admin.uuid,
-      date: new Date()
-    }
-
-    let token = tools.generateJWT('10m',tokenData);
+  
     // For User
     const userRecipient = data.email;
     const userMailBody = tools.mailBody('Your OTP for Login', otp, admin);
