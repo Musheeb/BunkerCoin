@@ -21,7 +21,7 @@ const addBunkerPool = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({
-            success: false,
+            success: "failed",
             message: 'Something went wrong',
             error: error.message
         });
