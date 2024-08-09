@@ -1,7 +1,6 @@
 const prisma = require('../../config/prismaClient');
 
 const get = async (id) => {
-    console.log(id);
     let result = await prisma.referral.findUnique({
         where: {
             uuid: id
@@ -42,7 +41,7 @@ const findByEntity = async (data) => {
 };
 exports.findByEntity = findByEntity;
 
-const createRefferralTree = async (referringUser, referredUser) => {
+const createReferralTree = async (referringUser, referredUser) => {
     try {
         const referral = await this.create({
             parentId: referringUser.uuid,
@@ -53,4 +52,4 @@ const createRefferralTree = async (referringUser, referredUser) => {
         throw error;
     }
 };
-exports.createRefferralTree = createRefferralTree;
+exports.createReferralTree = createReferralTree;

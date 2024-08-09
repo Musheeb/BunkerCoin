@@ -26,7 +26,7 @@ const mailBody = function (subject, otp, data) {
         subject: subject,
         context: {
             otp: otp, // Generate OTP dynamically
-            name: data.username
+            name: data.username || "Anonymous"
         }
     };
 };
