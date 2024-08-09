@@ -124,7 +124,7 @@ const resendOtp = async (email) => {
   });
 
   let tokenData = {
-    email:data.email,
+    email:email,
     date: new Date()
   }
 
