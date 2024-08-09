@@ -59,6 +59,7 @@ const loginAdmin = async (data) => {
 
     let tokenData = {
       email:data.email,
+      uuid : admin.uuid,
       date: new Date()
     }
 
