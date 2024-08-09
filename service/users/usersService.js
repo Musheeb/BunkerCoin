@@ -2,7 +2,6 @@ const prisma = require('../../config/prismaClient');
 const jwt = require('jsonwebtoken');
 
 const get = async (id) => {
-    console.log(id);
     let result = await prisma.user.findUnique({
         where: {
             uuid: id
@@ -47,6 +46,7 @@ const findOne = async (data) => {
     let result = await prisma.user.findFirstOrThrow({
         where: data
     });
+    if (!result) return false;
     return result;
 };
 exports.findOne = findOne;
@@ -91,7 +91,7 @@ const deleteTempJWTAndUpdateNewJWT = async (uuid, tokenToDelete, tokenToAdd) => 
             accessToken: tokenToAdd,
             fcmToken: null
         });
-        return await prisma.user.update({
+        const updatedUser = await prisma.user.update({
             where: { uuid: uuid },
             data: {
                 token: filteredTokens,
@@ -101,8 +101,87 @@ const deleteTempJWTAndUpdateNewJWT = async (uuid, tokenToDelete, tokenToAdd) => 
             }
         });
 
+        const projectedData = await prisma.user.findFirst({
+            where: { uuid: updatedUser.uuid },
+            select: {
+                id: true,
+                uuid: true,
+                username: true,
+                email: true,
+                referralCode: true,
+                referredBy: true,
+                bcWallet: true,
+                comissionWallet: true,
+                profilePicture: true,
+                createdAt: true,
+                updatedAt: true,
+                status: true,
+                isEmailVerified: true,
+                loginCount: true,
+                lastLoginTimestamp: true,
+                token: true
+            }
+        });
+
+        return {
+            id: projectedData.id,
+            uuid: projectedData.uuid,
+            username: projectedData.username,
+            email: projectedData.email,
+            referralCode: projectedData.referralCode,
+            referredBy: projectedData.referredBy,
+            bcWallet: projectedData.bcWallet,
+            comissionWallet: projectedData.comissionWallet,
+            profilePicture: projectedData.profilePicture,
+            createdAt: projectedData.createdAt,
+            updatedAt: projectedData.updatedAt,
+            status: projectedData.status,
+            isEmailVerified: projectedData.isEmailVerified,
+            loginCount: projectedData.loginCount,
+            lastLoginTimestamp: projectedData.lastLoginTimestamp,
+            token: projectedData.token[0]?.accessToken,
+            fcmToken: projectedData.token[0]?.fcmToken,
+        }
+
     } catch (error) {
         throw error;
     }
 };
 exports.deleteTempJWTAndUpdateNewJWT = deleteTempJWTAndUpdateNewJWT;
+
+const verifyReferredByCode = async (referralCode) => {
+    const isValidReferral = await prisma.user.findFirstOrThrow({
+        where: {
+            referralCode: referralCode
+        }
+    });
+    // console.log(isValidReferral);
+    if (isValidReferral) return true;
+    return false;
+};
+exports.verifyReferredByCode = verifyReferredByCode;
+
+const getProjectedData = async (userUuid, dataObjToInclude) => {
+    return await prisma.user.findFirst({
+        where: { uuid: userUuid },
+        select: dataObjToInclude
+    });
+};
+exports.getProjectedData = getProjectedData;
+
+const updateJwtAndOTP = async (userUuid, tokenToUpdate, otpToUpdate) => {
+    await prisma.user.update({
+        where: { uuid: userUuid },
+        data: {
+            token: [
+                {
+                    accessToken: tokenToUpdate,
+                    fcmToken: null
+                }
+            ],
+            otp: otpToUpdate
+        }
+    });
+    return
+};
+exports.updateJwtAndOTP = updateJwtAndOTP;
